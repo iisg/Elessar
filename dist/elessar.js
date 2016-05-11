@@ -223,13 +223,17 @@
                             initialize.super$.call(this, '<div class="elessar-range"><span class="elessar-barlabel">');
                             this.options = options;
                             this.perant = options.perant;
+                            if (this.options.allowDelete) {
+                                var remove = $('<button type="button" class="elessar-remove">&times;</button>');
+                                remove.on('click', $.proxy(this.removeClick, this));
+                                this.$el.append(remove);
+                            }
                             if (this.options.rangeClass)
                                 this.$el.addClass(this.options.rangeClass);
                             if (!this.readonly()) {
                                 this.$el.prepend('<div class="elessar-handle">').append('<div class="elessar-handle">');
                                 this.on('mouseenter.elessar touchstart.elessar', $.proxy(this.removePhantom, this));
                                 this.on('mousedown.elessar touchstart.elessar', $.proxy(this.mousedown, this));
-                                this.on('click', $.proxy(this.click, this));
                             } else {
                                 this.$el.addClass('elessar-readonly');
                             }
@@ -346,23 +350,8 @@
                                 return x ? x < 0 ? -1 : 1 : 0;
                             }
                         },
-                        click: function (ev) {
-                            ev.stopPropagation();
-                            ev.preventDefault();
-                            var self = this;
-                            if (ev.which !== 2 || !this.perant.options.allowDelete)
-                                return;
-                            if (this.deleteConfirm) {
-                                this.perant.removeRange(this);
-                                clearTimeout(this.deleteTimeout);
-                            } else {
-                                this.$el.addClass('elessar-delete-confirm');
-                                this.deleteConfirm = true;
-                                this.deleteTimeout = setTimeout(function () {
-                                    self.$el.removeClass('elessar-delete-confirm');
-                                    self.deleteConfirm = false;
-                                }, this.perant.options.deleteTimeout);
-                            }
+                        removeClick: function (ev) {
+                            this.perant.removeRange(this);
                         },
                         mousedown: function (ev) {
                             ev.stopPropagation();
@@ -573,7 +562,8 @@
                                     rangeClass: this.options.rangeClass,
                                     minSize: this.options.minSize ? this.abnormaliseRaw(this.options.minSize + this.options.min) : null,
                                     readonly: this.options.readonly,
-                                    htmlLabel: this.options.htmlLabel
+                                    htmlLabel: this.options.htmlLabel,
+                                    allowDelete: this.options.allowDelete
                                 });
                             if (this.options.data) {
                                 $range.data(this.options.data.call($range, this));
@@ -862,4 +852,4 @@
             {}
         ]
     }, {}, [8])(8);
-})
+});
